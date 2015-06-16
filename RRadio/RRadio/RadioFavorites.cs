@@ -7,7 +7,7 @@ using System.Linq;
 namespace Ronnrein.RRadio {
     public class RadioFavorites : ObservableCollection<RadioStation> {
 
-        private static string filename = "stations.txt";
+        public const string Path = "stations.txt";
 
         public RadioFavorites() {
             Load();
@@ -15,14 +15,14 @@ namespace Ronnrein.RRadio {
 
         public void Load() {
             try {
-                string[] lines = File.ReadAllLines(filename);
+                string[] lines = File.ReadAllLines(Path);
                 Clear();
                 foreach (string url in lines) {
                     Add(new RadioStation(url));
                 }
             }
             catch (FileNotFoundException) {
-                using (File.Create(filename)) { }
+                using (File.Create(Path)) { }
             }
         }
 
@@ -43,13 +43,13 @@ namespace Ronnrein.RRadio {
         }
 
         private static void Append(string url) {
-            File.AppendAllText(filename, url + Environment.NewLine);
+            File.AppendAllText(Path, url + Environment.NewLine);
         }
 
         private void Remove(string url) {
-            string[] lines = File.ReadAllLines(filename);
-            using (File.Create(filename)) { }
-            File.WriteAllLines(filename, lines.Where(l => l != url).ToArray());
+            string[] lines = File.ReadAllLines(Path);
+            using (File.Create(Path)) { }
+            File.WriteAllLines(Path, lines.Where(l => l != url).ToArray());
         }
 
     }

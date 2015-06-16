@@ -54,6 +54,7 @@ namespace Ronnrein.RRadio {
             URL = url;
             Name = url;
 
+            HttpStatus = (int) HttpStatusCode.NotFound;
             GetHttpStatusCode();
             GetTitle();
         }
@@ -117,13 +118,6 @@ namespace Ronnrein.RRadio {
 
             HttpStatus = (int)result;
             OnPropertyChanged("HttpStatus");
-            OnReceivedHttpStatusCode();
-        }
-
-        private void OnReceivedHttpStatusCode() {
-            if (ReceivedHttpStatusCode != null) {
-                ReceivedHttpStatusCode(this, HttpStatus);
-            }
         }
 
         public override string ToString() {

@@ -10,24 +10,27 @@ namespace RRadio {
 
     public partial class MainWindow : Window {
 
-        public RadioPlayer RadioPlayer { get; private set; }
+        public RadioPlayer Player { get; private set; }
         public RadioFavorites Stations { get; private set; } 
 
         public MainWindow() {
             InitializeComponent();
 
-            RadioPlayer = new RadioPlayer();
+            Player = new RadioPlayer();
             Stations = new RadioFavorites();
 
             DataContext = this;
         }
 
+        private RadioStation GetSelectedStation() {
+            return (RadioStation) ListFavorites.SelectedItem;
+        }
+
         private void ListFavorites_OnMouseDoubleClick(object sender, MouseButtonEventArgs mouseButtonEventArgs) {
-            RadioStation station = ((ListView) sender).SelectedItem as RadioStation;
-            if (station.IsUp()) {
-                RadioPlayer.Station = station;
-                RadioPlayer.Play();
-            }
+            RadioStation station = GetSelectedStation();
+            if (station == null || !station.IsUp()) return;
+            Player.Station = station;
+            Player.Play();
         }
 
         private void MenuStationsAdd_OnClick(object sender, RoutedEventArgs e) {
@@ -35,7 +38,37 @@ namespace RRadio {
             if (dialog.ShowDialog() == true) {
                 Stations.Add(new RadioStation(dialog.ResponseText));
             }
-            
+        }
+
+        private void MenuStationsRemove_OnClick(object sender, RoutedEventArgs e) {
+            RadioStation station = GetSelectedStation();
+            if (station == null) return;
+            Stations.Remove(station);
+            if (Player.Station == station) {
+                Player.Stop();
+                Player.Station = null;
+            }
+        }
+
+        private void MenuStationsPlay_OnClick(object sender, RoutedEventArgs e) {
+            RadioStation station = GetSelectedStation();
+            if (station == null || !station.IsUp()) return;
+            Player.Station = station;
+            Player.Play();
+        }
+
+        private void MenuStationRefresh_OnClick(object sender, RoutedEventArgs e) {
+            Stations.Load();
+        }
+
+        private void MenuStationOpenFile(object sender, RoutedEventArgs e) {
+            System.Diagnostics.Process.Start(RadioFavorites.Path);
+        }
+
+        private void MenuStationCopyURL_OnClick(object sender, RoutedEventArgs e) {
+            RadioStation station = GetSelectedStation();
+            if (station == null) return;
+            Clipboard.SetText(station.URL);
         }
     }
 }

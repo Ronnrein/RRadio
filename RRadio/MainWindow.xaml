@@ -9,7 +9,10 @@
             </MenuItem>
             <MenuItem Header="_Stations">
                 <MenuItem Header="_Add" Name="MenuStationsAdd" Click="MenuStationsAdd_OnClick" />
-                <MenuItem Header="_Reload" />
+                <MenuItem Header="_Remove" Click="MenuStationsRemove_OnClick" />
+                <MenuItem Header="_Refresh" Click="MenuStationRefresh_OnClick" />
+                <MenuItem Header="_Copy URL" Click="MenuStationCopyURL_OnClick" />
+                <MenuItem Header="_Open file" Click="MenuStationOpenFile" />
             </MenuItem>
         </Menu>
         <StatusBar DockPanel.Dock="Bottom">
@@ -35,22 +38,22 @@
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
             <StatusBarItem>
-                <TextBlock Text="{Binding RadioPlayer.Station.Format, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{Binding Player.Station.Format, Mode=OneWay}" />
             </StatusBarItem>
             <Separator Grid.Column="1" />
             <StatusBarItem Grid.Column="2">
                 <TextBlock>
-                    <Run Text="{Binding RadioPlayer.Station.Bitrate, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Run Text="{Binding Player.Station.Bitrate, Mode=OneWay}" />
                     <Run> kbps</Run>
                 </TextBlock>
             </StatusBarItem>
             <Separator Grid.Column="3" />
             <StatusBarItem Grid.Column="4">
-                <TextBlock Text="{Binding RadioPlayer.Station.Genre, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{Binding Player.Station.Genre, Mode=OneWay}" />
             </StatusBarItem>
             <Separator Grid.Column="6" />
             <StatusBarItem Grid.Column="7">
-                <TextBlock Text="{Binding RadioPlayer.PlaybackState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{Binding Player.PlaybackState, Mode=OneWay}" />
             </StatusBarItem>
             <Separator Grid.Column="8" />
             <StatusBarItem Grid.Column="9" HorizontalAlignment="Right">
@@ -62,7 +65,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="200"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <ListView Name="ListFavorites" MouseDoubleClick="ListFavorites_OnMouseDoubleClick" ItemsSource="{Binding Stations}">
+            <ListView Name="ListFavorites" MouseDoubleClick="ListFavorites_OnMouseDoubleClick" ItemsSource="{Binding Stations}" SelectionMode="Single">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <BulletDecorator DataContext="{Binding}">
@@ -87,6 +90,19 @@
                         </BulletDecorator>
                     </DataTemplate>
                 </ListView.ItemTemplate>
+                <ListView.Resources>
+                    <ContextMenu x:Key="FavoritesItemMenu">
+                        <MenuItem Header="_Play" Click="MenuStationsPlay_OnClick" />
+                        <Separator />
+                        <MenuItem Header="_Add" Click="MenuStationsAdd_OnClick" />
+                        <MenuItem Header="_Remove" Click="MenuStationsRemove_OnClick" />
+                        <MenuItem Header="_Refresh" Click="MenuStationRefresh_OnClick" />
+                        <MenuItem Header="_Copy URL" Click="MenuStationCopyURL_OnClick" />
+                    </ContextMenu>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="ContextMenu" Value="{StaticResource FavoritesItemMenu}" />
+                    </Style>
+                </ListView.Resources>
             </ListView>
             <Grid Grid.Column="1">
                 <StackPanel>
