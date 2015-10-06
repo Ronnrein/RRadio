@@ -37,9 +37,9 @@
     <Reference Include="NAudio">
       <HintPath>..\packages\NAudio.1.7.3\lib\net35\NAudio.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -64,10 +64,13 @@
     <Compile Include="AddStationDialog.xaml.cs">
       <DependentUpon>AddStationDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="RRadio\RadioFavorites.cs" />
     <Compile Include="RRadio\RadioPlayer.cs" />
+    <Compile Include="RRadio\RadioSong.cs" />
     <Compile Include="RRadio\RadioStation.cs" />
     <Compile Include="RRadio\RadioStream.cs" />
+    <Compile Include="RRadio\Utils\Extensions.cs" />
     <Page Include="AddStationDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

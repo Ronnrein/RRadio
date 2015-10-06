@@ -5,8 +5,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Mime;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Web;
 using Newtonsoft.Json;
 
@@ -28,7 +31,7 @@ namespace Ronnrein.RRadio {
         /// </summary>
         public int HttpStatus { get; private set; }
 
-        public string Title { get; private set; }
+        public RadioSong CurrentSong { get; private set; }
 
         public string Format { get; private set; }
 
@@ -55,8 +58,7 @@ namespace Ronnrein.RRadio {
             Name = url;
 
             HttpStatus = (int) HttpStatusCode.NotFound;
-            GetHttpStatusCode();
-            GetTitle();
+            LoadMetainfo();
         }
 
         /// <summary>
@@ -67,12 +69,9 @@ namespace Ronnrein.RRadio {
             return HttpStatus == (int)HttpStatusCode.OK;
         }
 
-        private void GetTitle() {
-            
-        }
-
-        private async void GetHttpStatusCode() {
+        private async void LoadMetainfo() {
             HttpStatusCode result = HttpStatusCode.NotFound;
+            byte[] buffer = new byte[512];
 
             try {
                 HttpWebRequest request = (HttpWebRequest) WebRequest.Create(URL);
@@ -82,6 +81,8 @@ namespace Ronnrein.RRadio {
                 using (Task<WebResponse> responseTask = request.GetResponseAsync()) {
                     HttpWebResponse response = (HttpWebResponse) await responseTask;
                     result = response.StatusCode;
+                    HttpStatus = (int)result;
+                    OnPropertyChanged("HttpStatus");
                     Name = response.GetResponseHeader("icy-name");
                     if (Name == "") {
                         Name = URL;
@@ -107,17 +108,61 @@ namespace Ronnrein.RRadio {
                         OnPropertyChanged("Format");
                         OnPropertyChanged("MetaInt");
                         OnPropertyChanged("Bitrate");
+
+                        try {
+
+                            int metadataLength = 0;
+                            string metadataHeader = "";
+                            string oldMetadataHeader = "";
+                            int count = 0;
+
+                            Stream socketStream = response.GetResponseStream();
+                            while (true) {
+                                int bufLen = socketStream.Read(buffer, 0, buffer.Length);
+                                if (bufLen < 0) {
+                                    return;
+                                }
+                                
+                                for (int i = 0; i < bufLen; i++) {
+                                    if (metadataLength != 0) {
+                                        metadataHeader += Convert.ToChar(buffer[i]);
+                                        metadataLength--;
+                                        if (metadataLength == 0) {
+                                            string fileName = "";
+                                            if (!metadataHeader.Equals(oldMetadataHeader)) {
+                                                string title = Regex.Match(metadataHeader, "(StreamTitle=')(.+?)(?: \\((.+)\\))?(';)").Groups[2].Value.Trim();
+                                                CurrentSong = new RadioSong(title);
+                                                OnPropertyChanged("CurrentSong");
+                                                return;
+                                            }
+                                            metadataHeader = "";
+                                        }
+                                    }
+                                    else {
+                                        if (count++ >= MetaInt) {
+                                            metadataLength = Convert.ToInt32(buffer[i])*16;
+                                            if (metadataLength == 0) {
+                                                return;
+                                            }
+                                            count = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception e) {
+                            Console.WriteLine(e.Message);
+                        }
                     }
                 }
             }
             catch (WebException e) {
                 Console.WriteLine(e.Message);
-                result = ((HttpWebResponse) e.Response).StatusCode;
+                HttpStatus = (int)((HttpWebResponse) e.Response).StatusCode;
             }
             catch (UriFormatException) { }
 
-            HttpStatus = (int)result;
-            OnPropertyChanged("HttpStatus");
+            
         }
 
         public override string ToString() {

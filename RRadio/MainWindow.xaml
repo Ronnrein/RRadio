@@ -57,7 +57,7 @@
             </StatusBarItem>
             <Separator Grid.Column="8" />
             <StatusBarItem Grid.Column="9" HorizontalAlignment="Right">
-                <Slider Name="SliderVolume" Maximum="1" Height="15" Width="100" Value="{Binding RadioPlayer.Volume, Mode=TwoWay}" />
+                <Slider Name="SliderVolume" Maximum="1" Height="15" Width="100" Value="{Binding Player.Volume, Mode=TwoWay}" />
             </StatusBarItem>
         </StatusBar>
         <Grid>
@@ -86,7 +86,25 @@
                                     </Ellipse.Style>
                                 </Ellipse>
                             </BulletDecorator.Bullet>
-                            <TextBlock Margin="2,0,0,0"  Text="{Binding Name}"></TextBlock>
+                            <TextBlock Margin="2,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text">
+                                            <Setter.Value>
+                                                <MultiBinding StringFormat="{}{0} ({1})">
+                                                    <Binding Path="Name" />
+                                                    <Binding Path="CurrentSong" />
+                                                </MultiBinding>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentSong}" Value="{x:Null}">
+                                                <Setter Property="Text" Value="{Binding Name}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </BulletDecorator>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -106,12 +124,43 @@
             </ListView>
             <Grid Grid.Column="1">
                 <StackPanel>
-                    <StackPanel>
-                        <Image Source="Images/default-thumbnail.png" Width="70" Height="70" HorizontalAlignment="Left"></Image>
-                    </StackPanel>
+                    <Border BorderBrush="#000000" BorderThickness="0 0 0 1" VerticalAlignment="Top">
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="64" Height="64" HorizontalAlignment="Left">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Source" Value="{Binding Player.Station.CurrentSong.ImageURL}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Player.Station.CurrentSong}" Value="{x:Null}">
+                                                <Setter Property="Source" Value="Images/default-thumbnail.png" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <StackPanel Margin="5, 0, 0, 0">
+                                <TextBlock><Hyperlink NavigateUri="{Binding Player.Station.CurrentSong.ArtistURL}" RequestNavigate="Hyperlink_OnRequestNavigate">
+                                    <TextBlock Text="{Binding Player.Station.CurrentSong.Artist}" />
+                                </Hyperlink></TextBlock>
+                                <TextBlock><Hyperlink NavigateUri="{Binding Player.Station.CurrentSong.TrackURL}" RequestNavigate="Hyperlink_OnRequestNavigate">
+                                    <TextBlock Text="{Binding Player.Station.CurrentSong.Name}" />
+                                </Hyperlink></TextBlock>
+                                <TextBlock><Hyperlink NavigateUri="{Binding Player.Station.CurrentSong.AlbumURL}" RequestNavigate="Hyperlink_OnRequestNavigate">
+                                    <TextBlock Text="{Binding Player.Station.CurrentSong.Album}" />
+                                </Hyperlink></TextBlock>
+                                <StackPanel.Resources>
+                                    <Style TargetType="Hyperlink">
+                                        <Setter Property="FontSize" Value="15" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="TextDecorations" Value=""></Setter>
+                                        <Setter Property="Foreground" Value="Black"></Setter>
+                                    </Style>
+                                </StackPanel.Resources>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Grid>
-
         </Grid>
     </DockPanel>
 </Window>
