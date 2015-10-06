@@ -29,6 +29,7 @@ namespace Ronnrein.RRadio {
         public float Volume {
             get { return volume; }
             set {
+                Console.WriteLine("Volume changed");
                 volume = (value < 0) ? 0 : (value > 1.0f) ? 1.0f : value;
                 volumeProvider.Volume = volume;
                 OnPropertyChanged();
@@ -142,9 +143,13 @@ namespace Ronnrein.RRadio {
             fullyDownloaded = false;
             string url = (string)urlObj;
             webRequest = (HttpWebRequest)WebRequest.Create(url);
+            webRequest.Headers.Add("Icy-MetaData:1");
+            webRequest.UserAgent = "WinampMPEG/5.09";
             HttpWebResponse response;
+            int metaInt;
             try {
                 response = (HttpWebResponse)webRequest.GetResponse();
+                Int32.TryParse(response.GetResponseHeader("icy-metaint"), out metaInt);
             }
             catch (WebException e) {
                 if (e.Status != WebExceptionStatus.RequestCanceled) {
@@ -158,7 +163,7 @@ namespace Ronnrein.RRadio {
             try {
                 using (Stream responseStream = response.GetResponseStream()) {
                     readFullyStream = new RadioStream(responseStream);
-                    readFullyStream.MetaInt = Station.MetaInt;
+                    readFullyStream.MetaInt = metaInt;
                     do {
                         if (IsBufferNearlyFull()) {
                             // Take a break
